@@ -144,6 +144,12 @@ where
         self.inner.exact_match(&ip.nibbles().as_ref(), masklen)
     }
 
+    pub fn collect_upto(&self, ip: A, masklen: u32) -> Vec<(A, u32, &T)> {
+        self.inner.find_forward(&ip.nibbles().as_ref()).iter()
+            .map(|(bits_matched, value)|(ip.mask(*bits_matched), *bits_matched, *value))
+            .collect()
+    }
+
     /// Perform longest match lookup of `ip` and return the best matching
     /// prefix, designated by ip, masklen, along with its value.
     ///

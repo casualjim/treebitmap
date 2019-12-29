@@ -101,6 +101,45 @@ impl<T: Sized> TreeBitmap<T> {
         // note: we do not need to touch the external bits
     }
 
+    pub fn find_forward(&self, nibbles: &[u8]) -> Vec<(u32, &T)> {
+        let mut cur_hdl = self.root_handle();
+        let mut cur_index = 0;
+        let mut bits_matched = 0;
+        let mut bits_searched = 0;
+        let mut matches: Vec<(AllocatorHandle, u32, u32)> = vec![]; // result handle + index
+
+        for nibble in nibbles {
+            let cur_node = *self.trienodes.get(&cur_hdl, cur_index);
+            let match_mask = node::MATCH_MASKS[*nibble as usize];
+
+            if let MatchResult::Match(result_hdl, result_index, matching_bit_index) =
+                cur_node.match_internal(match_mask)
+            {
+                bits_matched = bits_searched;
+                bits_matched += node::BIT_MATCH[matching_bit_index as usize];
+                matches.push((result_hdl, bits_matched, result_index));
+            }
+
+            if cur_node.is_endnode() {
+                break;
+            }
+            match cur_node.match_external(match_mask) {
+                MatchResult::Chase(child_hdl, child_index) => {
+                    bits_searched += 4;
+                    cur_hdl = child_hdl;
+                    cur_index = child_index;
+                    continue;
+                }
+                MatchResult::None => {
+                    break;
+                }
+                _ => unreachable!(),
+            }
+        }
+
+        matches.iter().map(|(hdl, bmt, idx)| (*bmt, self.results.get(hdl, *idx))).collect()
+    }
+
     /// longest match lookup of ```nibbles```. Returns bits matched as u32, and reference to T.
     pub fn longest_match(&self, nibbles: &[u8]) -> Option<(u32, &T)> {
         let mut cur_hdl = self.root_handle();
