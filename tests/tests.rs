@@ -76,19 +76,19 @@ fn find_upto() {
     tbm.insert(Ipv4Addr::new(100, 64, 1, 0), 24, 10064124);
     tbm.insert(Ipv4Addr::new(100, 64, 0, 0), 10, 100004);
 
-    let result = tbm.collect_upto(Ipv4Addr::new(10, 10, 10, 10), 32);
+    let result = tbm.supernets(Ipv4Addr::new(10, 10, 10, 10), 32);
     assert_eq!(result, vec![(Ipv4Addr::new(10, 0, 0, 0), 8, &100002)]);
 
-    let result = tbm.collect_upto(Ipv4Addr::new(100, 100, 100, 100), 32);
+    let result = tbm.supernets(Ipv4Addr::new(100, 100, 100, 100), 32);
     assert_eq!(result, vec![(Ipv4Addr::new(100, 64, 0, 0), 10, &100004)]);
 
-    let result = tbm.collect_upto(Ipv4Addr::new(100, 64, 0, 100), 32);
+    let result = tbm.supernets(Ipv4Addr::new(100, 64, 0, 100), 32);
     assert_eq!(result, vec![(Ipv4Addr::new(100, 64, 0, 0), 10, &100004), (Ipv4Addr::new(100, 64, 0, 0), 24, &10064024)]);
 
-    let result = tbm.collect_upto(Ipv4Addr::new(100, 64, 1, 100), 32);
+    let result = tbm.supernets(Ipv4Addr::new(100, 64, 1, 100), 32);
     assert_eq!(result, vec![(Ipv4Addr::new(100, 64, 0, 0), 10, &100004), (Ipv4Addr::new(100, 64, 1, 0), 24, &10064124)]);
 
-    let result = tbm.collect_upto(Ipv4Addr::new(200, 200, 200, 200), 32);
+    let result = tbm.supernets(Ipv4Addr::new(200, 200, 200, 200), 32);
     assert_eq!(result, vec![]);
 }
 
