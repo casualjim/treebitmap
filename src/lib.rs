@@ -36,6 +36,7 @@ use address::Address;
 
 #[cfg(feature = "alloc")]
 pub use address::addr::*;
+use std::borrow::BorrowMut;
 
 /// A fast, compressed IP lookup table.
 pub struct IpLookupTable<A, T> {
@@ -145,6 +146,28 @@ impl<A, T> IpLookupTable<A, T>
   /// ```
   pub fn exact_match(&self, ip: A, masklen: u32) -> Option<&T> {
     self.inner.exact_match(&ip.nibbles().as_ref(), masklen)
+  }
+
+  /// Perform exact match lookup of `ip`/`masklen` and return the
+  /// mutable value.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// use treebitmap::IpLookupTable;
+  /// use std::net::Ipv6Addr;
+  ///
+  /// let mut table = IpLookupTable::new();
+  /// let prefix = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
+  /// let masklen = 32;
+  /// table.insert(prefix, masklen, "foo");
+  ///
+  /// assert_eq!(table.exact_match_mut(prefix, masklen), Some(&mut "foo"));
+  /// // differing mask
+  /// assert_eq!(table.exact_match_mut(prefix, 48), None);
+  /// ```
+  pub fn exact_match_mut(&mut self, ip: A, masklen: u32) -> Option<&mut T> {
+    self.inner.exact_match_mut(&ip.nibbles().as_ref(), masklen)
   }
 
   /// Perform exact match lookup of `ip`/`masklen` and return the

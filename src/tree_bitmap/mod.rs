@@ -298,6 +298,36 @@ impl<T: Sized> TreeBitmap<T> {
     guesses.iter().map(|v|v.1).collect()
   }
 
+  pub fn exact_match_mut(&mut self, nibbles: &[u8], masklen: u32) -> Option<&mut T> {
+    let mut cur_hdl = self.root_handle();
+    let mut cur_index = 0;
+    let mut bits_left = masklen;
+
+    for nibble in nibbles {
+      let cur_node = self.trienodes.get(&cur_hdl, cur_index);
+      let bitmap = node::gen_bitmap(*nibble, cmp::min(bits_left, 4)) & node::END_BIT_MASK;
+      let reached_final_node = bits_left < 4 || (cur_node.is_endnode() && bits_left == 4);
+
+      if reached_final_node {
+        match cur_node.match_internal(bitmap) {
+          MatchResult::Match(result_hdl, result_index, _) => {
+            return Some(self.results.get_mut(&result_hdl, result_index));
+          }
+          _ => return None,
+        }
+      }
+
+      match cur_node.match_external(bitmap) {
+        MatchResult::Chase(child_hdl, child_index) => {
+          cur_hdl = child_hdl;
+          cur_index = child_index;
+          bits_left -= 4;
+        }
+        _ => return None,
+      }
+    }
+    None
+  }
   pub fn exact_match(&self, nibbles: &[u8], masklen: u32) -> Option<&T> {
     let mut cur_hdl = self.root_handle();
     let mut cur_index = 0;
