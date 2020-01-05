@@ -184,7 +184,7 @@ impl<A, T> IpLookupTable<A, T>
   /// let more_specific = Ipv6Addr::new(0x2001, 0xdb8, 0xdead, 0, 0, 0, 0, 0);
   /// let most_specific = Ipv6Addr::new(0x2001, 0xdb8, 0xdead, 0xbeef, 0, 0, 0, 0);
   /// let almost_exact = Ipv6Addr::new(0x2001, 0xdb8, 0xdead, 0xbeef, 0xcafe, 0xbabe, 0, 1);
-  /// let exact = Ipv6Addr::new(0x2001, 0xdb8, 0xdead, 0xbeef, 0xcafe, 0xdade, 0, 1);
+  /// let exact = Ipv6Addr::new(0x2001, 0xdb8, 0xdead, 0xbeef, 0xcafe, 0xbabe, 0, 2);
   /// table.insert(less_specific, 32, "foo");
   /// table.insert(more_specific, 48, "bar");
   /// table.insert(most_specific, 64, "baz");
